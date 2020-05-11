@@ -84,7 +84,7 @@ bool esp_littlefs_mounted(const char* partition_label);
  *          - ESP_OK      if successful
  *          - ESP_FAIL    on error
  */
-esp_err_t esp_littlefs_format(const char* partition_label);
+esp_err_t esp_littlefs_format(bool internal_version);
 
 /**
  * Get information for littlefs

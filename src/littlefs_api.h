@@ -45,7 +45,6 @@ typedef struct _vfs_littlefs_file_t {
 typedef struct {
     lfs_t *fs;                                /*!< Handle to the underlying littlefs */
     SemaphoreHandle_t lock;                   /*!< FS lock */
-    const esp_partition_t* partition;         /*!< The partition on which littlefs is located */
     char base_path[ESP_VFS_PATH_MAX+1];       /*!< Mount point */
 
     struct lfs_config cfg;                    /*!< littlefs Mount configuration */
@@ -55,6 +54,9 @@ typedef struct {
     vfs_littlefs_file_t **cache;              /*!< A cache of pointers to the opened files */
     uint16_t             cache_size;          /*!< The cache allocated size (in pointers) */
     uint16_t             fd_count;            /*!< The count of opened file descriptor used to speed up computation */
+
+    bool internal_version;
+    char *label;
 } esp_littlefs_t;
 
 /**
