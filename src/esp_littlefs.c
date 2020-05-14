@@ -272,9 +272,11 @@ esp_err_t esp_littlefs_format(bool internal_version) {
     {
         int res;
         ESP_LOGD(TAG, "Formatting filesystem");
+#ifndef CONFIG_NEONIOUS_ONE
         if(internal_version)
             spi_flash_erase_range(gFSPos, g_rom_flashchip.chip_size - gFSPos);
         else
+#endif
             data_spiflash_erase(CONFIG_CLIENT_SIZE_DATA_OFFSET, gSPIFlashSize - CONFIG_CLIENT_SIZE_DATA_OFFSET);
         res = lfs_format(efs->fs, &efs->cfg);
         if( res != LFS_ERR_OK ) {
