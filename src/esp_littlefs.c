@@ -473,7 +473,7 @@ static esp_err_t esp_littlefs_init(const esp_vfs_littlefs_conf_t* conf)
     }
 
 #ifdef CONFIG_NEONIOUS_ONE
-    bool internal_version = false;
+    bool internal_version = true;
 
     /* Allocate Context */
     efs = low_calloc(1, sizeof(esp_littlefs_t));
