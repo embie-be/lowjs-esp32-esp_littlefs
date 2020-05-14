@@ -886,9 +886,10 @@ static int vfs_littlefs_open(void* ctx, const char * path, int flags, int mode) 
     if( res < 0 ) {
         esp_littlefs_free_fd(efs, fd);
         sem_give(efs);
-        ESP_LOGE(TAG, "Failed to open file. Error %s (%d)",
-                esp_littlefs_errno(res), res);
-        errno = -LFS_ERR_INVAL;
+        if(-res != ENOENT)
+            ESP_LOGE(TAG, "Failed to open file. Error %s (%d)",
+                    esp_littlefs_errno(res), res);
+        errno = -res;
         return -1;
     }
 
@@ -1052,6 +1053,7 @@ static int vfs_littlefs_fsync(void* ctx, int fd)
     vfs_littlefs_file_t *file = NULL;
 
 
+
     sem_take(efs);
     if((uint32_t)fd > efs->cache_size) {
         sem_give(efs);
@@ -1099,8 +1101,9 @@ static int vfs_littlefs_fstat(void* ctx, int fd, struct stat * st) {
     res = lfs_stat(efs->fs, file->path, &info);
     if (res < 0) {
         sem_give(efs);
-        ESP_LOGE(TAG, "Failed to stat file \"%s\". Error %s (%d)",
-                file->path, esp_littlefs_errno(res), res);
+        if(-res != ENOENT)
+            ESP_LOGE(TAG, "Failed to stat file \"%s\". Error %s (%d)",
+                    file->path, esp_littlefs_errno(res), res);
         errno = -res;
         return -1;
     }
@@ -1387,8 +1390,9 @@ static int vfs_littlefs_mkdir(void* ctx, const char* name, mode_t mode) {
     res = lfs_mkdir(efs->fs, name);
     sem_give(efs);
     if (res < 0) {
-        ESP_LOGE(TAG, "Failed to mkdir \"%s\". Error %s (%d)",
-                name, esp_littlefs_errno(res), res);
+        if(-res != EEXIST)
+            ESP_LOGE(TAG, "Failed to mkdir \"%s\". Error %s (%d)",
+                    name, esp_littlefs_errno(res), res);
         errno = -res;
         return -1;
     }
