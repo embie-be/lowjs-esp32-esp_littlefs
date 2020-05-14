@@ -486,7 +486,7 @@ static esp_err_t esp_littlefs_init(const esp_vfs_littlefs_conf_t* conf)
     // block device configuration
     efs->cfg.read_size = DATA_SPIFLASH_WRITE_256B;
     efs->cfg.prog_size = DATA_SPIFLASH_WRITE_256B;
-    efs->cfg.block_size = DATA_SPIFLASH_ERASE_4KB;; 
+    efs->cfg.block_size = DATA_SPIFLASH_ERASE_4KB;
     efs->cfg.block_count = (gSPIFlashSize - CONFIG_CLIENT_SIZE_DATA_OFFSET) / efs->cfg.block_size;
     efs->cfg.cache_size = CONFIG_LITTLEFS_CACHE_SIZE;
     efs->cfg.lookahead_size = CONFIG_LITTLEFS_LOOKAHEAD_SIZE;
@@ -542,7 +542,7 @@ static esp_err_t esp_littlefs_init(const esp_vfs_littlefs_conf_t* conf)
         // block device configuration
         efs->cfg.read_size = CONFIG_LITTLEFS_READ_SIZE;
         efs->cfg.prog_size = CONFIG_LITTLEFS_WRITE_SIZE;
-        efs->cfg.block_size = CONFIG_LITTLEFS_BLOCK_SIZE;; 
+        efs->cfg.block_size = CONFIG_LITTLEFS_BLOCK_SIZE;
         efs->cfg.block_count = (g_rom_flashchip.chip_size - gFSPos) / efs->cfg.block_size;
         efs->cfg.cache_size = CONFIG_LITTLEFS_CACHE_SIZE;
         efs->cfg.lookahead_size = CONFIG_LITTLEFS_LOOKAHEAD_SIZE;

@@ -21,7 +21,23 @@ extern int gFSPos;
 static const char TAG[] = "esp_littlefs_api";
 
 int littlefs_api_read(const struct lfs_config *c, lfs_block_t block,
-        lfs_off_t off, void *buffer, lfs_size_t size) {
+        lfs_off_t off, void *buffer, lfs_size_t size)
+{
+    if(size > 1024)
+    {
+        // Split up... Not sure why LittleFS sometimes ignores the read size, but lets handle it
+        for(int i = 0; i + 1024 <= size; i += 1024)
+        {
+            int j = size - i;
+            if(j > 1024)
+                j = 1024;
+            int ret = littlefs_api_read(c, block, off + i, ((unsigned char *)buffer) + i, j);
+            if(ret != 0)
+                return ret;
+        }
+        return 0;
+    }
+
     esp_littlefs_t * efs = c->context;
     size_t part_off = (block * c->block_size) + off;
 
