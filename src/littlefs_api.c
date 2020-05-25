@@ -44,6 +44,7 @@ int littlefs_api_read(const struct lfs_config *c, lfs_block_t block,
 #ifndef CONFIG_NEONIOUS_ONE
     if(efs->internal_version)
     {
+
         esp_err_t err = spi_flash_read(gFSPos + part_off, buffer, size);
         if (err) {
             ESP_LOGE(TAG, "failed to read addr %08x, size %08x, err %d", part_off, size, err);

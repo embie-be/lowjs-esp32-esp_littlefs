@@ -133,8 +133,10 @@ esp_err_t esp_littlefs_info(const char* partition_label, size_t *total_bytes, si
     if(err != ESP_OK) return false;
     efs = _efs[index];
 
+    sem_take(efs);
     if(total_bytes) *total_bytes = efs->cfg.block_size * efs->cfg.block_count; 
     if(used_bytes) *used_bytes = efs->cfg.block_size * lfs_fs_size(efs->fs);
+    sem_give(efs);
 
     return ESP_OK;
 }
@@ -1443,8 +1445,10 @@ static int vfs_littlefs_rmdir(void* ctx, const char* name) {
 static int vfs_littlefs_update_mtime_value(esp_littlefs_t *efs, const char *path, time_t t)
 {
     int res;
+    sem_take(efs);
     res = lfs_setattr(efs->fs, path, LITTLEFS_ATTR_MTIME,
             &t, sizeof(t));
+    sem_give(efs);
     if( res < 0 ) {
         ESP_LOGE(TAG, "Failed to update mtime (%d)", res);
         errno = -res;
@@ -1495,8 +1499,10 @@ static time_t vfs_littlefs_get_mtime(esp_littlefs_t *efs, const char *path)
 {
     time_t t = 0;
     int size;
+    sem_take(efs);
     size = lfs_getattr(efs->fs, path, LITTLEFS_ATTR_MTIME,
             &t, sizeof(t));
+    sem_give(efs);
     if( size < 0 ) {
 #ifndef CONFIG_LITTLEFS_USE_ONLY_HASH        
         ESP_LOGI(TAG, "Failed to get mtime attribute %s (%d)",
