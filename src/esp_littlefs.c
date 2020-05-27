@@ -1186,8 +1186,9 @@ static int vfs_littlefs_unlink(void* ctx, const char *path) {
     res = lfs_remove(efs->fs, path);
     if (res < 0) {
         sem_give(efs);
-        ESP_LOGE(TAG, fail_str_1 " Error %s (%d)",
-                path, esp_littlefs_errno(res), res);
+        if(-res != ENOENT)
+            ESP_LOGE(TAG, fail_str_1 " Error %s (%d)",
+                    path, esp_littlefs_errno(res), res);
         errno = -res;
         return -1;
     }
