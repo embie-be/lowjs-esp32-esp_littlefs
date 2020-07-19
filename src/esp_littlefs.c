@@ -28,6 +28,7 @@
 #include "alloc.h"
 
 
+
 static const char TAG[] = "esp_littlefs";
 
 #define CONFIG_LITTLEFS_BLOCK_SIZE 4096 /* ESP32 can only operate at 4kb */
@@ -564,7 +565,7 @@ static esp_err_t esp_littlefs_init(const esp_vfs_littlefs_conf_t* conf)
         efs->cfg.sync  = littlefs_api_sync;
     }
 
-    efs->lock = xSemaphoreCreateRecursiveMutex();
+    efs->lock = xSemaphoreCreateMutex();
     if (efs->lock == NULL) {
         ESP_LOGE(TAG, "mutex lock could not be created");
         err = ESP_ERR_NO_MEM;
@@ -626,7 +627,8 @@ static inline int sem_take(esp_littlefs_t *efs) {
 #if LOG_LOCAL_LEVEL >= 4
     ESP_LOGD(TAG, "------------------------ Sem Taking [%s]", pcTaskGetTaskName(NULL));
 #endif
-    xSemaphoreTakeRecursive(efs->lock, portMAX_DELAY);
+    xSemaphoreTake(efs->lock, portMAX_DELAY);
+
 #if LOG_LOCAL_LEVEL >= 4
     ESP_LOGD(TAG, "--------------------->>> Sem Taken [%s]", pcTaskGetTaskName(NULL));
 #endif
@@ -641,7 +643,7 @@ static inline int sem_give(esp_littlefs_t *efs) {
 #if LOG_LOCAL_LEVEL >= 4
     ESP_LOGD(TAG, "---------------------<<< Sem Give [%s]", pcTaskGetTaskName(NULL));
 #endif
-    return xSemaphoreGiveRecursive(efs->lock);
+   return xSemaphoreGive(efs->lock);
 }
 
 
@@ -902,6 +904,8 @@ static int vfs_littlefs_open(void* ctx, const char * path, int flags, int mode) 
     memcpy(file->path, path, path_len);
 #endif
 
+    sem_give(efs);
+
 #if CONFIG_LITTLEFS_USE_MTIME
     if (!(lfs_flags & LFS_O_RDONLY)) {
         /* If this is being opened as not read-only */
@@ -909,7 +913,6 @@ static int vfs_littlefs_open(void* ctx, const char * path, int flags, int mode) 
     }
 #endif
 
-    sem_give(efs);
     ESP_LOGD(TAG, "Done opening %s", path);
     return fd;
 }
@@ -1112,12 +1115,11 @@ static int vfs_littlefs_fstat(void* ctx, int fd, struct stat * st) {
         return -1;
     }
 
+    sem_give(efs);
+
 #if CONFIG_LITTLEFS_USE_MTIME  
     st->st_mtime = vfs_littlefs_get_mtime(efs, file->path);
 #endif
-
-    sem_give(efs);
-
     st->st_size = info.size;
     st->st_mode = ((info.type==LFS_TYPE_REG)?S_IFREG:S_IFDIR);
     return 0;
